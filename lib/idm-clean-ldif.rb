@@ -124,13 +124,16 @@ class LdapCleaner
     end
 
     # su=glucoz.com contient un attribut "ou" qu'il faut supprimer
-    if /^su=glucoz\.com/.match(dn)
+    if rdn_name == "su" && rdn_value == "glucoz.com"
       attrs.delete("ou")
     end
     
     # Pour certains RDN "ou=", l'object class organizationalUnit correspondant
     # est manquant
-    if 
+    if rdn_name == "ou" && !attrs["objectclass"].include?("organizationalUnit")
+      attrs["objectclass"] << "organizationalUnit"
+    end
+    
     attrs.each do |attr,vals|
       ldif_string << attr_to_ldif(attr, vals)
     end
