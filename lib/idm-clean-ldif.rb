@@ -124,7 +124,8 @@ class LdapCleaner
     end
 
     # su=glucoz.com contient un attribut "ou" qu'il faut supprimer
-    if rdn_name == "su" && rdn_value == "glucoz.com"
+    # "gensduvoyage.com" aussi
+    if (rdn_name == "su" && rdn_value == "glucoz.com") || dn == "su=gensduvoyage.com, o=idm, c=fr"
       attrs.delete("ou")
     end
     
@@ -132,6 +133,60 @@ class LdapCleaner
     # est manquant
     if rdn_name == "ou" && !attrs["objectclass"].include?("organizationalUnit")
       attrs["objectclass"] << "organizationalUnit"
+    end
+    
+    # Les enregistrements qui ne contiennent que l'OC "mailRecipient" en dehors de
+    # "top" servent à du mail forwarding. Comme cet OC n'est pas STRUCTURAL, on le 
+    # remplace par le nouvel OC "mailForwarder", qui l'est.
+    if attrs["objectclass"].sort == [ "mailRecipient", "top" ]
+      attrs["objectclass"] = [ "top", "mailForwarder" ]
+    end
+    
+    # L'attribut "intragroup" nécessite soit l'OC "projectUser", soit "baseContact"
+    # On rajoute le premier OC si aucun des 2 n'est présent
+    if attrs.has_key?("intragroup") && (attrs["objectclass"] & [ "projectUser", "baseContact"]).empty?
+      attrs["objectclass"] << "projectUser"
+    end
+
+    # On ne peut pas avoir à la fois les OC "organizationalPerson" et
+    # "organizationalRole"
+    # XXX : le nom des 2 OC est parfois en minuscule dans ce cas d'erreur
+    if !(attrs["objectclass"] & [ "organizationalperson", "organizationalrole" ]).empty? ||
+        !(attrs["objectclass"] & [ "organizationalPerson", "organizationalRole" ]).empty?
+      # on enlève "organizationalPerson" si l'attribut "sn" n'existe pas
+      if attrs.has_key?("sn")
+        attrs["objectclass"] -= [ "organizationalrole" ]
+        attrs["objectclass"] -= [ "organizationalRole" ]
+      else
+        attrs["objectclass"] -= [ "organizationalperson" ]
+        attrs["objectclass"] -= [ "organizationalPerson" ]
+      end
+    end
+
+    # Doublon d'OC
+    if !(attrs["objectclass"] & [ "organizationalperson", "organizationalPerson" ]).empty?
+      attrs["objectclass"] -= [ "organizationalperson" ]
+    end
+    if !(attrs["objectclass"] & [ "projectuser", "projectUser" ]).empty?
+      attrs["objectclass"] -= [ "projectuser" ]
+    end
+
+
+    # L'OC "cvsuser" n'est pas structurel
+    if (attrs["objectclass"].include?("cvsuser") || attrs["objectclass"].include?("cvsUser")) &&
+        (attrs["objectclass"] & [ "person", "organizational", "inetOrgPerson" ]).empty?
+      attrs["objectclass"] << "inetOrgPerson"
+    end
+    
+    # L'OC "baseContact" doit au minimum avoir aussi "organizationalPerson"
+    if (attrs["objectclass"].sort == [ "baseContact", "top" ]) ||
+        (attrs["objectclass"].sort == [ "baseContact", "projectUser", "top" ])
+      attrs["objectclass"] << "organizationalPerson"
+    end
+    
+    # Les attributs "st" et "postaladdresss" nécessitent l'OC "organizationalPerson"
+    if (attrs.has_key?("st") || attrs.has_key?("postaladdress")) and !attrs["objectclass"].include?("organizationalPerson")
+      attrs["objectclass"] << "organizationalPerson"     
     end
     
     attrs.each do |attr,vals|
