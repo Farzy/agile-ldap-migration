@@ -48,14 +48,13 @@ class LdapCleaner
 	# Trouve le RDN dans un DN bien formé
 	RDN_REG = /^(.*?)=(.*?),.*$/
 
-  # Case-insensitive uniq() clone
+  # Case-insensitive uniq() clone.
+  # En cas de conflit de casse, ce code garde la casse de la
+  # première occurrence.
   def self.uniq_nocase(ary)
     umap = Hash.new
     ary.each { |word| umap[word.downcase] ||= word }
-    # Attention : Hash#keys retourne des chaînes de caractères "frozen",
-    # dont même les copies effectuées avec "clone" ne sont pas manipulables
-    # Il faut donc forcer la copie
-    umap.keys.map { |k| k + "" }
+    umap.values
   end
   
   # Ces fonctions sont inspirées de LDAP::LDIF
