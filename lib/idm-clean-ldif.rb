@@ -51,7 +51,7 @@ class LdapCleaner
   # Case-insensitive uniq() clone.
   # En cas de conflit de casse, ce code garde la casse de la
   # première occurrence.
-  def self.uniq_nocase(ary)
+  def uniq_nocase(ary)
     umap = Hash.new
     ary.each { |word| umap[word.downcase] ||= word }
     umap.values
@@ -64,7 +64,7 @@ class LdapCleaner
   # return *true* if +str+ contains a character with an ASCII value > 127 or
   # a NUL, LF or CR. Otherwise, *false* is returned.
   #
-  def self.unsafe_char?( str )
+  def unsafe_char?( str )
     # This could be written as a single regex, but this is faster.
     str =~ /^[ :]/ || str =~ /[\x00-\x1f\x7f-\xff]/
   end
@@ -72,7 +72,7 @@ class LdapCleaner
   # Perform Base64 decoding of +str+. If +concat+ is *true*, LF characters
   # are stripped.
   #
-  def self.base64_encode( str, concat=false )
+  def base64_encode( str, concat=false )
     str = [ str ].pack( 'm' )
     str.gsub!( /\n/, '' ) if concat
     str
@@ -82,7 +82,7 @@ class LdapCleaner
   # 
   # * attr: attribute name
   # * vals: a hash of values
-  def self.attr_to_ldif(attr, vals)
+  def attr_to_ldif(attr, vals)
     ldif_string = ''
 
     vals.each do |val|
@@ -106,9 +106,10 @@ class LdapCleaner
 
   # Convert an LDAP::Record to LDIF.
   # Cleanup Schema errors.
-  def self.to_ldif(ldap_record)
-    # Certains DN contiennent un retour chariot, à corriger
-    dn = ldap_record.dn.gsub(/\n|\r/, '')
+  def to_ldif(ldap_record)
+    # Certains DN contiennent un retour chariot ou un backslash, ou
+    # du code HTML, à corriger
+    dn = ldap_record.dn.gsub(%r{(\n|\r|\\|</?br>)}, '')
     attrs = ldap_record.attrs
 
     ldif_string = "dn: %s\n" % dn
@@ -118,7 +119,11 @@ class LdapCleaner
     md = RDN_REG.match(dn)
     rdn_name  = md[1]
     rdn_value = md[2]
-    attrs[rdn_name] = rdn_value
+    attrs[rdn_name] = [ rdn_value ]
+
+    # Suppression des doublons
+    return if @all_DNs.has_key?(dn)
+    @all_DNs[dn] = 1
 
     # Entrée de test à supprimer, car elle est incorrecte
     return if dn == "cn=test,o=idm,c=fr"
@@ -173,7 +178,7 @@ class LdapCleaner
 
     # On ne peut pas avoir à la fois les OC "organizationalPerson" et
     # "organizationalRole"
-    # XXX : le nom des 2 OC est parfois en minuscule dans ce cas d'erreur
+    # Le nom des 2 OC est parfois en minuscule dans ce cas d'erreur
     if !(attrs["objectclass"] & [ "organizationalperson", "organizationalrole" ]).empty? ||
         !(attrs["objectclass"] & [ "organizationalPerson", "organizationalRole" ]).empty?
       # on enlève "organizationalPerson" si l'attribut "sn" n'existe pas
@@ -232,16 +237,14 @@ class LdapCleaner
       attrs["objectclass"] << "organizationalPerson"
     end
 
-    # Dédoublonnage de l'attribut "projectaccess", dont les valeurs peuvent ne
-    # différer que par la casse.
-    # Idem pour "routingaddress"
-    # Idem pour "projectrsrc"
+    # Dédoublonnage des attributs "projectaccess", "routingaddress", "projectrsrc"
+    # dont les valeurs peuvent ne différer que par la casse.
     [ "projectaccess", "routingaddress", "projectrsrc" ].each do |attr|
       if attrs.has_key?(attr)
         attrs[attr] = uniq_nocase(attrs[attr])
       end
     end
-    
+
     attrs.each do |attr,vals|
       ldif_string << attr_to_ldif(attr, vals)
     end
@@ -284,12 +287,14 @@ EOS
 
   def clean_ldif
     output = ''
+    # Liste de toutes les clés, pour détecter les doublons
+    @all_DNs = Hash.new
 
     ldif.each { |rec|
       # On enlève les attributs système
       rec.clean
       # Cette fonction fait un gros nettoyage
-      obj = LdapCleaner::to_ldif(rec)
+      obj = to_ldif(rec)
       output << obj << "\n" if !obj.nil?
     }
     output
