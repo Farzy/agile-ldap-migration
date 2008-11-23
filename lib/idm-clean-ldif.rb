@@ -128,13 +128,15 @@ class LdapCleaner
     # "ou" par erreur. On force l'attribut, au cas où il
     # n'existe pas
     # On doit en plus tenir compte de plusieurs casses pour "societyUnit"
-    if rdn_name == "su" # and !( attrs["objectclass"].include?("societyUnit") || attrs["objectclass"].include?("SocietyUnit"))
+    if rdn_name == "su"
+      # On enlève les OC erronées, s'il y en a
       attrs["objectclass"] -= [ "societyUnit", "SocietyUnit", "organizationalUnit" ]
       attrs["objectclass"] << "societyUnit"
     end
 
     # Même type de problème avec "pu"
     if rdn_name =="pu" && !attrs["objectclass"].include?("projectUnit")
+      # On enlève les OC erronées, s'il y en a
       attrs["objectclass"] -= [ "societyUnit"]
       attrs["objectclass"] << "projectUnit"
       attrs.delete("su")
@@ -194,7 +196,7 @@ class LdapCleaner
     end
 
     # L'OC "cvsuser" n'est pas structurel
-    if (attrs["objectclass"].include?("cvsuser") || attrs["objectclass"].include?("cvsUser")) &&
+    if !(attrs["objectclass"] & [ "cvsuser", "cvsUser" ]).empty? &&
         (attrs["objectclass"] & [ "person", "organizational", "inetOrgPerson" ]).empty?
       attrs["objectclass"] << "inetOrgPerson"
     end
