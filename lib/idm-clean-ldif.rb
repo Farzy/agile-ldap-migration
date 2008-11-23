@@ -48,6 +48,16 @@ class LdapCleaner
 	# Trouve le RDN dans un DN bien formé
 	RDN_REG = /^(.*?)=(.*?),.*$/
 
+  # Case-insensitive uniq() clone
+  def self.uniq_nocase(ary)
+    umap = Hash.new
+    ary.each { |word| umap[word.downcase] ||= word }
+    # Attention : Hash#keys retourne des chaînes de caractères "frozen",
+    # dont même les copies effectuées avec "clone" ne sont pas manipulables
+    # Il faut donc forcer la copie
+    umap.keys.map { |k| k + "" }
+  end
+  
   # Ces fonctions sont inspirées de LDAP::LDIF
 
   LINE_LENGTH = 77
@@ -99,7 +109,7 @@ class LdapCleaner
   # Cleanup Schema errors.
   def self.to_ldif(ldap_record)
     # Certains DN contiennent un retour chariot, à corriger
-    dn = ldap_record.dn.gsub(/\n/, '')
+    dn = ldap_record.dn.gsub(/\n|\r/, '')
     attrs = ldap_record.attrs
 
     ldif_string = "dn: %s\n" % dn
@@ -121,6 +131,13 @@ class LdapCleaner
     if rdn_name == "su" # and !( attrs["objectclass"].include?("societyUnit") || attrs["objectclass"].include?("SocietyUnit"))
       attrs["objectclass"] -= [ "societyUnit", "SocietyUnit", "organizationalUnit" ]
       attrs["objectclass"] << "societyUnit"
+    end
+
+    # Même type de problème avec "pu"
+    if rdn_name =="pu" && !attrs["objectclass"].include?("projectUnit")
+      attrs["objectclass"] -= [ "societyUnit"]
+      attrs["objectclass"] << "projectUnit"
+      attrs.delete("su")
     end
 
     # su=glucoz.com contient un attribut "ou" qu'il faut supprimer
@@ -148,6 +165,11 @@ class LdapCleaner
       attrs["objectclass"] << "projectUser"
     end
 
+    # L'attribut "rsrcaccess" nécessite l'OC "projectUser"
+    if attrs.has_key?("rsrcaccess") && !attrs["objectclass"].include?("projectUser")
+      attrs["objectclass"] << "projectUser"
+    end
+
     # On ne peut pas avoir à la fois les OC "organizationalPerson" et
     # "organizationalRole"
     # XXX : le nom des 2 OC est parfois en minuscule dans ce cas d'erreur
@@ -171,7 +193,6 @@ class LdapCleaner
       attrs["objectclass"] -= [ "projectuser" ]
     end
 
-
     # L'OC "cvsuser" n'est pas structurel
     if (attrs["objectclass"].include?("cvsuser") || attrs["objectclass"].include?("cvsUser")) &&
         (attrs["objectclass"] & [ "person", "organizational", "inetOrgPerson" ]).empty?
@@ -185,8 +206,39 @@ class LdapCleaner
     end
     
     # Les attributs "st" et "postaladdresss" nécessitent l'OC "organizationalPerson"
-    if (attrs.has_key?("st") || attrs.has_key?("postaladdress")) and !attrs["objectclass"].include?("organizationalPerson")
+    # ou bien "organizationalRole". Si aucun des 2 n'est présent, on ajoute
+    # le premier.
+    if (attrs.has_key?("st") || attrs.has_key?("postaladdress")) and 
+        (attrs["objectclass"] &  [ "organizationalPerson", "organizationalRole" ]).empty?
       attrs["objectclass"] << "organizationalPerson"     
+    end
+    
+    # Suppression des numéros de téléphone en doublon, correction ou suppression
+    # des numéros invalides
+    if attrs.has_key?("telephonenumber")
+      # Pas de " " ni "--" comme numéro de téléphone
+      attrs["telephonenumber"].delete(" ")
+      attrs["telephonenumber"].delete("  ")
+      attrs["telephonenumber"].delete("   ")
+      attrs["telephonenumber"].delete("    ")
+      attrs["telephonenumber"].delete("--")
+      # Cet algorithme conserve la version sans espaces ou points en cas de doublons
+      attrs["telephonenumber"].map! { |t| t.gsub(/( +|\.)/, "") }.uniq!
+    end
+    
+    # S'il y a l'OC "person" mais pas "organizationalPerson", on rajoute le second
+    if attrs["objectclass"].include?("person") && !attrs["objectclass"].include?("organizationalPerson")
+      attrs["objectclass"] << "organizationalPerson"
+    end
+
+    # Dédoublonnage de l'attribut "projectaccess", dont les valeurs peuvent ne
+    # différer que par la casse.
+    # Idem pour "routingaddress"
+    # Idem pour "projectrsrc"
+    [ "projectaccess", "routingaddress", "projectrsrc" ].each do |attr|
+      if attrs.has_key?(attr)
+        attrs[attr] = uniq_nocase(attrs[attr])
+      end
     end
     
     attrs.each do |attr,vals|
