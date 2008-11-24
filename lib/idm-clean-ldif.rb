@@ -274,7 +274,7 @@ d'OpenLDAP en un fichier LDIF compatible avec OpenLDAP 2.3.
 
 Usage: #{PROGNAME} [options] <Fichier LDIF>
 EOS
-      opt :debug, "Mode debug", :default => false
+      #opt :debug, "Mode debug", :default => false
     end
 
     if ARGV.size != 1 || !File.exist?(ARGV[0])
@@ -292,7 +292,7 @@ EOS
     nil
   end
 
-  def clean_ldif
+  def cleanup_ldif
     output = ''
     # Liste de toutes les clés, pour détecter les doublons
     @all_DNs = Hash.new
@@ -310,7 +310,7 @@ EOS
   def run
     parse_arguments
     read_ldif
-    data = clean_ldif
+    data = cleanup_ldif
     puts data
   end
 
