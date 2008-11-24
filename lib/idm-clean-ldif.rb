@@ -127,6 +127,13 @@ class LdapCleaner
 
     # Entrée de test à supprimer, car elle est incorrecte
     return if dn == "cn=test,o=idm,c=fr"
+
+    # Nettoyage des Backslashes : on les supprime
+    attrs.each { |attr_key, attr_values|
+      attr_values.each { |value|
+        value.gsub!(/\\/, "")
+      }
+    }
     
     # Entrées de type societyUnit (su), enregistrée avec l'OC
     # "ou" par erreur. On force l'attribut, au cas où il
