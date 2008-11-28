@@ -1,4 +1,4 @@
-INFILE	:= idm-orig-20081022.ldif
+INFILE	:= idm-orig-20081128.ldif
 OUTFILE := idm-clean.ldif
 CLEANER := ./idm-clean-ldif.rb
 ROOTDN  := "cn=admin, o=idm, c=fr"

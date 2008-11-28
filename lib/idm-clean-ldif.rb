@@ -252,6 +252,15 @@ class LdapCleaner
       end
     end
 
+    # Correction des identifiants de messagerie Cyrus Imap. On enlève le
+    # préfixe "idmfd_". On laisse les autres éventuels préfixes, pour les
+    # autres domaines (de clients), qui sont à corriger plus tard si besoin.
+    [ "routingaddress", "cyrusmailbox" ].each do |attr_name|
+      if attrs.has_key?(attr_name)
+        attrs[attr_name].map! { |attr| attr.gsub(/idmfr_/, "") }
+      end
+    end
+    
     attrs.each do |attr,vals|
       ldif_string << attr_to_ldif(attr, vals)
     end
