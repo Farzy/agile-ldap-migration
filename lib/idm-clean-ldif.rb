@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
-# -*- coding: None -*-
+# -*- coding: UTF-8 -*-
 # vim: sw=2 sts=2:
 
-# idm-clean-ldif.rb : Nettoyage et mise en confirmité de l'annuaire
+# idm-clean-ldif.rb : Nettoyage et mise en conformité de l'annuaire
 # LDAP IDM pour OpenLDAP 2.3
 
 # Auteur:: Farzad FARID
-# Copyright:: (C) 2008 Pragmatic Source
+# Copyright:: (C) 2008-2009 Pragmatic Source
 #
 # = Licence
 #
