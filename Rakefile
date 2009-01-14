@@ -96,6 +96,13 @@ namespace :ldap do
 end
 
 namespace :imap do
+  desc "Liste les dossiers Cyrus importables depuis isis"
+  task :show_mboxlist => :config do
+    puts "Liste des dossiers Cyrus Imap importables d'isis"
+    puts_and_exec %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+      sed -n -e 's/idmfr_//g' -e '/^user\\./ p' }
+  end
+
   desc "Commande de duplication des dossiers Cyrus (sans leur contenu)"
   task :create_mboxlist => :config do
     puts "Duplication des dossiers Cyrus Imap"
