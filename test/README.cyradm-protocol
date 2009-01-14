@@ -1,0 +1,25 @@
+Description du fichier cyradm-protocol.pcap
+
+Ce dump réseau créé avec Wireshark contient le résultat de l'exécution de
+commandes d'administration Cyrus via IMAP2 et sert à décoder et comprendre
+le protocole.
+
+Les actions suivantes ont été exécutées dans l'ordre :
+
+Connexion de "cyrus" en authentification "LOGIN"
+lm
+lm user.veroniquegf
+lm user.veroniquegf*
+lam user.farzy
+lam user.vero*
+cm user.toto
+lam user.toto
+sam user.toto cyrus all
+lam user.toto.sent => not found
+cm user.toto.sent
+lm user.toto*
+lam user.toto*
+info
+ver
+quit
+

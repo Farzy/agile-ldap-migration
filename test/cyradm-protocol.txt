@@ -1,0 +1,124 @@
+* OK pragmatic Cyrus IMAP4 v2.2.13-Debian-2.2.13-10 server ready
+1 CAPABILITY
+* CAPABILITY IMAP4 IMAP4rev1 ACL QUOTA LITERAL+ MAILBOX-REFERRALS NAMESPACE UIDPLUS ID NO_ATOMIC_RENAME UNSELECT CHILDREN MULTIAPPEND BINARY SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES ANNOTATEMORE IDLE STARTTLS AUTH=NTLM AUTH=DIGEST-MD5 AUTH=CRAM-MD5 SASL-IR
+1 OK Completed
+2 LOGIN cyrus XXXXXXX
+2 OK User logged in
+3 RLIST "" ""
+* LIST (\Noselect) "." ""
+3 OK Completed (0.000 secs 0 calls)
+4 RLIST "" "*"
+* LIST (\HasChildren) "." "shared"
+* LIST (\HasNoChildren) "." "shared.1-Achats"
+* LIST (\HasNoChildren) "." "shared.1-Contact"
+* LIST (\HasNoChildren) "." "shared.1-Fax"
+* LIST (\HasNoChildren) "." "shared.1-Gestion"
+* LIST (\HasNoChildren) "." "shared.2-commun"
+* LIST (\HasChildren) "." "shared.Associations"
+* LIST (\HasChildren) "." "shared.Newsletters"
+* LIST (\HasNoChildren) "." "shared.Newsletters.Netpme"
+* LIST (\HasNoChildren) "." "shared.Newsletters.Tissot"
+* LIST (\HasNoChildren) "." "shared.Newsletters.URSSAF"
+* LIST (\HasNoChildren) "." "shared.Newsletters.tpe-pme"
+* LIST (\HasNoChildren) "." "shared.TODO"
+* LIST (\HasNoChildren) "." "shared.test"
+* LIST (\HasChildren) "." "user.farzy"
+* LIST (\HasNoChildren) "." "user.farzy.00-FACTURES-A-CLASSER"
+* LIST (\HasNoChildren) "." "user.farzy.1-Action"
+* LIST (\HasNoChildren) "." "user.farzy.2-En-attente"
+* LIST (\HasNoChildren) "." "user.farzy.3-En-cours"
+* LIST (\HasNoChildren) "." "user.farzy.A-TRIER"
+* LIST (\HasChildren) "." "user.farzy.Entreprise"
+* LIST (\HasNoChildren) "." "user.farzy.Entreprise.APCE"
+* LIST (\HasNoChildren) "." "user.farzy.Entreprise.CFE"
+* LIST (\HasChildren) "." "user.farzy.Entreprise.Fournisseurs"
+* LIST (\HasNoChildren) "." "user.farzy.Entreprise.Fournisseurs.GrosBill"
+* LIST (\HasNoChildren) "." "user.farzy.Entreprise.Fournisseurs.OVH"
+* LIST (\HasNoChildren) "." "user.farzy.Entreprise.Fournisseurs.Palm"
+* LIST (\HasNoChildren) "." "user.farzy.Entreprise.Noms de domaine"
+* LIST (\HasNoChildren) "." "user.farzy.Sent"
+* LIST (\HasNoChildren) "." "user.farzy.Templates"
+* LIST (\HasChildren) "." "user.farzy.Trash"
+* LIST (\HasNoChildren) "." "user.farzy.Trash.Apple Mail To Do"
+* LIST (\HasChildren) "." "user.ffarid"
+* LIST (\HasNoChildren) "." "user.ffarid.1-Action"
+* LIST (\HasNoChildren) "." "user.ffarid.2-En-attente"
+* LIST (\HasNoChildren) "." "user.ffarid.3-En-cours"
+* LIST (\HasChildren) "." "user.veroniquegf"
+* LIST (\HasChildren) "." "user.veroniquegf.Sent"
+4 OK Completed (0.010 secs 563 calls)
+5 RLIST "" user.veroniquegf
+* LIST (\HasChildren) "." "user.veroniquegf"
+5 OK Completed (0.000 secs 8 calls)
+6 RLIST "" "user.veroniquegf*"
+* LIST (\HasChildren) "." "user.veroniquegf"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Drafts"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Junk"
+* LIST (\HasChildren) "." "user.veroniquegf.Sent"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Sent.2006.05-May"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Templates"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Trash"
+6 OK Completed (0.000 secs 8 calls)
+7 GETACL user.farzy
+* ACL user.farzy farzy lrswipcda
+7 OK Completed
+8 RLIST "" "user.vero*"
+* LIST (\HasChildren) "." "user.veroniquegf"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Drafts"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Junk"
+* LIST (\HasChildren) "." "user.veroniquegf.Sent"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Sent.2006.05-May"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Templates"
+* LIST (\HasNoChildren) "." "user.veroniquegf.Trash"
+8 OK Completed (0.000 secs 8 calls)
+9 GETACL user.veroniquegf
+* ACL user.veroniquegf veroniquegf lrswipcda
+9 OK Completed
+10 GETACL user.veroniquegf.Drafts
+* ACL user.veroniquegf.Drafts veroniquegf lrswipcda
+10 OK Completed
+11 GETACL user.veroniquegf.Junk
+* ACL user.veroniquegf.Junk veroniquegf lrswipcda
+11 OK Completed
+12 GETACL user.veroniquegf.Sent
+* ACL user.veroniquegf.Sent veroniquegf lrswipcda
+12 OK Completed
+13 GETACL user.veroniquegf.Sent.2006.05-May
+* ACL user.veroniquegf.Sent.2006.05-May veroniquegf lrswipcda
+13 OK Completed
+14 GETACL user.veroniquegf.Templates
+* ACL user.veroniquegf.Templates veroniquegf lrswipcda
+14 OK Completed
+15 GETACL user.veroniquegf.Trash
+* ACL user.veroniquegf.Trash veroniquegf lrswipcda
+15 OK Completed
+16 CREATE user.toto
+16 OK Completed
+17 GETACL user.toto
+* ACL user.toto toto lrswipcda
+17 OK Completed
+18 SETACL user.toto cyrus lrswipcda
+18 OK Completed
+19 GETACL user.toto.sent
+19 NO Mailbox does not exist
+20 CREATE user.toto.sent
+20 OK Completed
+21 RLIST "" "user.toto*"
+* LIST (\HasChildren) "." "user.toto"
+* LIST (\HasNoChildren) "." "user.toto.sent"
+21 OK Completed (0.000 secs 3 calls)
+22 RLIST "" "user.toto*"
+* LIST (\HasChildren) "." "user.toto"
+* LIST (\HasNoChildren) "." "user.toto.sent"
+22 OK Completed (0.000 secs 3 calls)
+23 GETACL user.toto
+* ACL user.toto toto lrswipcda cyrus lrswipcda
+23 OK Completed
+24 GETACL user.toto.sent
+* ACL user.toto.sent toto lrswipcda cyrus lrswipcda
+24 OK Completed
+25 GETANNOTATION "" "*" "value.shared"
+25 OK Completed
+26 ID NIL
+* ID ("name" "Cyrus IMAPD" "version" "v2.2.13-Debian-2.2.13-10 2006/11/13 16:17:53" "vendor" "Project Cyrus" "support-url" "http://asg.web.cmu.edu/cyrus" "os" "Linux" "os-version" "2.6.24.2dedibox-r8-1-c7" "environment" "Built w/Cyrus SASL 2.1.22; Running w/Cyrus SASL 2.1.22; Built w/Sleepycat Software: Berkeley DB 4.2.52: (December  3, 2003); Running w/Sleepycat Software: Berkeley DB 4.2.52: (December  3, 2003); Built w/OpenSSL 0.9.8c 05 Sep 2006; Running w/OpenSSL 0.9.8g 19 Oct 2007; CMU Sieve 2.2; TCP Wrappers; NET-SNMP; mmap = shared; lock = fcntl; nonblock = fcntl; idle = poll")
+26 OK Completed
