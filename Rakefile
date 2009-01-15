@@ -114,7 +114,7 @@ namespace :imap do
   
   desc "Récupère la liste les dossiers Cyrus importables depuis isis"
   task :get_mboxlist => :config do
-    MBOXLIST = %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+    MBOXLIST = %x{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
       sed -n -e 's/idmfr_//g' -e '/^user\\./ p' }
   end
 
