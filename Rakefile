@@ -112,11 +112,16 @@ namespace :imap do
     IMAP.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
   end
   
-  desc "Liste les dossiers Cyrus importables depuis isis"
-  task :show_mboxlist => :config do
-    puts "Liste des dossiers Cyrus Imap importables d'isis"
-    puts_and_exec %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+  desc "Récupère la liste les dossiers Cyrus importables depuis isis"
+  task :get_mboxlist => :config do
+    MBOXLIST = %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
       sed -n -e 's/idmfr_//g' -e '/^user\\./ p' }
+  end
+
+  desc "Liste les dossiers Cyrus importables depuis isis"
+  task :show_mboxlist => :get_mboxlist do
+    puts "Liste des dossiers Cyrus Imap importables d'isis"
+    puts MBOXLIST
   end
 
   desc "Commande de duplication des dossiers Cyrus (sans leur contenu)"
