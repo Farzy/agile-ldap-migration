@@ -121,9 +121,9 @@ namespace :imap do
   task :test => :config do
     puts "Test du serveur IMAP"
     imap = Net::IMAP.new("localhost")
-    puts "Capability: #{imap.capability}"
-    imap.authenticate("LOGIN", MyConfig["imap"]["login"], MyConfig["imap"]["password"])
-    puts "Capability after login: #{imap.capability}"
+    puts "Capability: #{imap.capability.join(' ')}"
+    imap.login(MyConfig["imap"]["login"], MyConfig["imap"]["password"])
+    puts "Capability after login: #{imap.capability.join(' ')}"
   end
 end
   
