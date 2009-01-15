@@ -49,9 +49,13 @@ end
 
 desc "Vérification de l'environnement d'exécution"
 task :config do
-  # Est-on sur la bonne machine
+  # Est-on sur la bonne machine ?
   if %x{hostname}.strip != HOSTNAME
     raise RuntimeError, "ERREUR : La machine courante doit être '#{HOSTNAME}'"
+  end
+  # Est-on root ?
+  if Process.uid != 0
+    raise RuntimeError, "ERREUR : Le script doit tourner sous l'utilisateur root'"
   end
 end
 
