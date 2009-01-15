@@ -110,6 +110,21 @@ namespace :imap do
 
     IMAP = Net::IMAP.new("localhost")
     IMAP.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
+
+    # extension de la class d'IMAP pour ajouter une fonction de logging
+    class << IMAP
+      def method_missing(method, *arguments)
+        # Si la fonction appelée est "show_*" alors affiche
+        # la commande "*" et ensuite exécute la dans le contexte IMAP
+        if method.to_s =~ /^show_(\w+)$/
+          imapcmd = $1
+          puts ">> IMAP #{imapcmd}#{arguments.inspect}"
+          self.send(imapcmd, *arguments)
+        else
+          super
+        end
+      end
+    end
   end
   
   desc "Récupère la liste les dossiers Cyrus importables depuis isis"
@@ -136,6 +151,18 @@ namespace :imap do
   task :test => "imap:connect" do
     puts "Test du serveur IMAP"
     puts "Capability after login: #{IMAP.capability.join(' ')}"
+    puts "Création d'un compte/dossier IMAP avec ACL pour Cyrus"
+    IMAP.show_create("user.ffarid")
+    puts "Anciens droits du dossier :"
+    IMAP.show_getacl("user.ffarid").each do |right|
+      puts "  #{right.user} : #{right.rights}"
+    end
+    IMAP.show_setacl("user.ffarid", "cyrus", "lrswipcda")
+    puts "Nouveaux droits du dossier :"
+    IMAP.show_getacl("user.ffarid").each do |right|
+      puts "  #{right.user} : #{right.rights}"
+    end
+    IMAP.show_delete("user.ffarid")
   end
 end
   
