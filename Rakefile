@@ -185,11 +185,11 @@ namespace :imap do
     folders.each do |folder|
       puts "Création de #{folder}"
       begin
-        IMAP.show_create("user.#{folder}")
+        IMAP.show_create(folder)
       rescue Net::IMAP::NoResponseError => e
         puts ">>>> Exception #{e}"
       end
-      IMAP.show_setacl("user.#{folder}", "cyrus", "lrswipcda")
+      IMAP.show_setacl(folder, "cyrus", "lrswipcda")
     end
   end
 end
