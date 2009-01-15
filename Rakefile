@@ -184,6 +184,12 @@ namespace :imap do
     folders = MBOXLIST.split(/\n/).map { |l| l.split(/\t/).first }
     folders.each do |folder|
       puts "Création de #{folder}"
+      begin
+        IMAP.show_create("user.#{folder}")
+      rescue Net::IMAP::NoResponseError => e
+        puts ">>>> Exception #{e}"
+      end
+      IMAP.show_setacl("user.#{folder}", "cyrus", "lrswipcda")
     end
   end
 end
