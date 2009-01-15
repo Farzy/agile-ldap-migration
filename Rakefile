@@ -173,7 +173,13 @@ namespace :imap do
 
   desc "Création de tous les dossiers IMAP"
   task :create_folders => [ "imap:connect", "imap:get_mboxlist" ] do
-
+    puts "Création de tous les dossiers IMAP"
+    # Extraction de la liste des dossiers de MBOXLIST : on garde
+    # le 1er champ de chaque ligne
+    folders = MBOXLIST.split(/\n/).map { |l| l.split(/\t/).first }
+    folders.each do |folder|
+      puts "Création de #{folder}"
+    end
   end
 end
   
