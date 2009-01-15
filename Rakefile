@@ -118,7 +118,7 @@ namespace :imap do
   end
 
   desc "Envoie des commandes de test à Cyrus Imap"
-  tast :test => :config do
+  task :test => :config do
     puts "Test du serveur IMAP"
     imap = Net::IMAP.new("localhost")
     puts "Capability: #{imap.capability}"
