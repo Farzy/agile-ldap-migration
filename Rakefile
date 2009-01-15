@@ -23,8 +23,6 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 
-require 'net/imap'
-
 #######################################################################
 # Configuration
 #######################################################################
@@ -108,6 +106,8 @@ end
 namespace :imap do
   desc "Connexion au serveur IMAP local"
   task :connect => :config do
+    require 'net/imap'
+
     IMAP = Net::IMAP.new("localhost")
     IMAP.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
   end
