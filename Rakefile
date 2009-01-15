@@ -102,6 +102,12 @@ namespace :ldap do
 end
 
 namespace :imap do
+  desc "Connexion au serveur IMAP local"
+  task :connect => :config do
+    IMAP = Net::IMAP.new("localhost")
+    IMAP.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
+  end
+  
   desc "Liste les dossiers Cyrus importables depuis isis"
   task :show_mboxlist => :config do
     puts "Liste des dossiers Cyrus Imap importables d'isis"
@@ -118,12 +124,9 @@ namespace :imap do
   end
 
   desc "Envoie des commandes de test à Cyrus Imap"
-  task :test => :config do
+  task :test => "imap:connect" do
     puts "Test du serveur IMAP"
-    imap = Net::IMAP.new("localhost")
-    puts "Capability: #{imap.capability.join(' ')}"
-    imap.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
-    puts "Capability after login: #{imap.capability.join(' ')}"
+    puts "Capability after login: #{IMAP.capability.join(' ')}"
   end
 end
   
