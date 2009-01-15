@@ -23,17 +23,23 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 
+require 'net/imap'
+
 #######################################################################
 # Configuration
 #######################################################################
-HOSTNAME = "berumail"
 TESTDIR  = File.join(File.dirname(__FILE__), "test")
-INFILE	 = File.join(TESTDIR, "idm-orig.ldif")
-OUTFILE  = File.join(TESTDIR, "idm-clean.ldif")
+DATADIR  = File.join(File.dirname(__FILE__), "data")
 CLEANER  = File.join("lib", "idm-clean-ldif.rb")
 SMTP_SIMULATOR = File.join("lib", "smtp-simulator.rb")
-ROOTDN   = "cn=admin, o=idm, c=fr"
-ROOTPW   = "Ur,ec1blC"
+
+MyConfig = YAML.load(IO.read(File.join(File.dirname(__FILE__), "config.yml")))
+HOSTNAME = MyConfig["hostname"]
+ROOTDN   = MyConfig["ldap"]["user"]
+ROOTPW   = MyConfig["ldap"]["password"]
+INFILE	 = File.join(DATADIR, MyConfig["ldap"]["infile"])
+OUTFILE  = File.join(DATADIR, MyConfig["ldap"]["outfile"])
+
 
 # Affiche une chaîne, pour exécute là dans un shell
 def puts_and_exec(str)
@@ -109,6 +115,15 @@ namespace :imap do
     puts_and_exec %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
       sed -n -e 's/idmfr_//g' -e '/^user\\./ p' | \
       su -c '/usr/sbin/ctl_mboxlist -u' cyrus}
+  end
+
+  desc "Envoie des commandes de test à Cyrus Imap"
+  tast :test => :config do
+    puts "Test du serveur IMAP"
+    imap = Net::IMAP.new("localhost")
+    puts "Capability: #{imap.capability}"
+    imap.authenticate("LOGIN", MyConfig["imap"]["login"], MyConfig["imap"]["password"])
+    puts "Capability after login: #{imap.capability}"
   end
 end
   

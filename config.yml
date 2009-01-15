@@ -1,0 +1,13 @@
+# Configuration de l'outil de migration LDAP/IMAP
+
+hostname: berumail
+ldap:
+  user: cn=admin, o=idm, c=fr
+  password: Ur,ec1blC
+  infile: idm-orig.ldif
+  outfile: idm-clean.ldif
+imap:
+  user: cyrus
+  password: Ir,A,ptlE2lT
+  
+
