@@ -110,7 +110,6 @@ namespace :imap do
 
     IMAP = Net::IMAP.new("localhost")
     IMAP.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
-
     # extension de la class d'IMAP pour ajouter une fonction de logging
     class << IMAP
       def method_missing(method, *arguments)
@@ -151,18 +150,30 @@ namespace :imap do
   task :test => "imap:connect" do
     puts "Test du serveur IMAP"
     puts "Capability after login: #{IMAP.capability.join(' ')}"
-    puts "Création d'un compte/dossier IMAP avec ACL pour Cyrus"
+    puts "Création d'un compte/dossier IMAP"
     IMAP.show_create("user.ffarid")
     puts "Anciens droits du dossier :"
     IMAP.show_getacl("user.ffarid").each do |right|
       puts "  #{right.user} : #{right.rights}"
     end
+    puts "Tentative de création d'un dossier qui existe déjà"
+    begin
+      IMAP.show_create("user.ffarid")
+    rescue Net::IMAP::NoResponseError => e
+      puts ">>>> Exception #{e}"
+    end
+    puts "Modification des ACL"
     IMAP.show_setacl("user.ffarid", "cyrus", "lrswipcda")
     puts "Nouveaux droits du dossier :"
     IMAP.show_getacl("user.ffarid").each do |right|
       puts "  #{right.user} : #{right.rights}"
     end
     IMAP.show_delete("user.ffarid")
+  end
+
+  desc "Création de tous les dossiers IMAP"
+  task :create_folders => [ "imap:connect", "imap:get_mboxlist" ] do
+
   end
 end
   
