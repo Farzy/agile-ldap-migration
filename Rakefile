@@ -18,6 +18,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Note : les tâches Rake qui n'ont pas besoin d'être visibles pour
+# l'utilisateur n'ont pas de description "desc".
 
 require 'rake'
 require 'rake/testtask'
@@ -45,7 +47,7 @@ def puts_and_exec(str)
   puts %x{#{str}}
 end
 
-desc "Vérification de l'environnement d'exécution"
+# Vérification de l'environnement d'exécution
 task :config do
   # Est-on sur la bonne machine ?
   if %x{hostname}.strip != HOSTNAME
@@ -57,9 +59,9 @@ task :config do
   end
 end
 
-desc "Tâche par défaut : ne fait rien"
-task :default => :config do
-  puts "Veuillez lire la documentation avant de lancer ce programme"
+# Tâche par défaut : ne fait rien
+task :default do
+  puts "Veuillez consulter 'rake -T' ou la documentation avant de lancer ce programme"
 end
 
 namespace :ldap do
@@ -72,7 +74,7 @@ namespace :ldap do
   end
 
   desc "Test d'insertion des enregistrements LDAP sur #{HOSTNAME}"
-  task :test_ldif => :clean_ldif do
+  task :insert_test => :clean_ldif do
     puts "Simulation d'insertion des enregistrements LDAP"
     puts_and_exec %{ldapadd -n -x -h localhost -D "#{ROOTDN}" -w "#{ROOTPW}" -f "#{OUTFILE}"}
   end
@@ -104,13 +106,16 @@ namespace :ldap do
 end
 
 namespace :imap do
-  desc "Connexion au serveur IMAP local"
+  # Connexion au serveur IMAP local
   task :connect => :config do
     require 'net/imap'
 
     IMAP = Net::IMAP.new("localhost")
     IMAP.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
-    # extension de la class d'IMAP pour ajouter une fonction de logging
+    # Extension de la class d'IMAP pour ajouter une fonction de logging
+    # Si la fonction appelée est "IMAP.show_*" alors on affiche
+    # la commande réelle et ses paramètre, et ensuite on exécute la
+    # commande dans le contexte IMAP.
     class << IMAP
       def method_missing(method, *arguments)
         # Si la fonction appelée est "show_*" alors affiche
@@ -126,7 +131,7 @@ namespace :imap do
     end
   end
   
-  desc "Récupère la liste les dossiers Cyrus importables depuis isis"
+  # Récupère la liste les dossiers Cyrus importables depuis isis
   task :get_mboxlist => :config do
     MBOXLIST = %x{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
       sed -n -e 's/idmfr_//g' -e '/^user\\./ p' }
