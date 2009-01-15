@@ -122,7 +122,7 @@ namespace :imap do
     puts "Test du serveur IMAP"
     imap = Net::IMAP.new("localhost")
     puts "Capability: #{imap.capability.join(' ')}"
-    imap.login(MyConfig["imap"]["login"], MyConfig["imap"]["password"])
+    imap.login(MyConfig["imap"]["user"], MyConfig["imap"]["password"])
     puts "Capability after login: #{imap.capability.join(' ')}"
   end
 end
