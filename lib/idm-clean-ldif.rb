@@ -125,8 +125,12 @@ class LdapCleaner
     return if @all_DNs.has_key?(dn)
     @all_DNs[dn] = 1
 
-    # Entrée de test à supprimer, car elle est incorrecte
-    return if dn == "cn=test,o=idm,c=fr"
+    # Suppression des entrées suivantes :
+    # - Entrée de test à supprimer, car elle est incorrecte
+    # - Entrée qui fait doublon avec "cn=alias_admin-linux,su=idm.fr,o=idm,c=fr"
+    return if [ "cn=test,o=idm,c=fr",
+          "cn=Copier de alias_admin-linux,su=idm.fr,o=idm,c=fr" ].include?(dn)
+
 
     # Nettoyage des Backslashes : on les supprime
     attrs.each { |attr_key, attr_values|
