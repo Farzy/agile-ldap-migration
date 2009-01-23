@@ -201,7 +201,7 @@ namespace :smtp do
     show_exec "scp isis:/etc/aliases /etc"
     show_exec "newaliases"
   end
-  desc "Envoie un mail de test en local au serveur SMTP"
+  desc "Envoie un mail de test en local au serveur SMTP. Ajouter 'MAILTO=xxx@idm.fr,yy@idmfr,zzz@domain.com' pour changer les destinataires"
   task :test_local => :config do
     puts "Test d'envoi d'un mail en local à une adresse @idm.fr de test"
     show_exec SMTP_SIMULATOR

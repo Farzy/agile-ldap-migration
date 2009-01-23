@@ -33,8 +33,10 @@ require 'net/smtp'
 # Création du mail à envoyer
 user_from = "ffarid@pragmatic-source.com" # Compte externe
 # Destinataires : des comptes de test IDM et des alias LDAP
-users_to_list = [ "enqueteirfdev@idm.fr", "postmaster@idm.fr" ]
-users_to = users_to_list.join(', ')
+# On utilise la variable d'environnement MAILTO si elle existe
+users_to = ENV["MAILTO"] || "enqueteirfdev@idm.fr,postmaster@idm.fr"
+
+users_to_list = users_to_list.split(/, */)
 the_email = <<EOT
 From: #{user_from}
 To: #{users_to}
