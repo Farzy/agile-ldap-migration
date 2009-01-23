@@ -33,20 +33,21 @@ require 'net/smtp'
 # Création du mail à envoyer
 user_from = "ffarid@pragmatic-source.com" # Compte externe
 # Destinataires : des comptes de test IDM et des alias LDAP
-users_to = [ "enqueteirfdev@idm.fr", "postmaster@idm.fr" ]
+users_to_list = [ "enqueteirfdev@idm.fr", "postmaster@idm.fr" ]
+users_to = users_to_list.join(', ')
 the_email = <<EOT
 From: #{user_from}
-To: #{user_to}
-Subject: Test migration messagerie, mail pour #{user_to}
+To: #{users_to}
+Subject: Test migration messagerie, mail pour #{users_to}
 
 Email de test.
 EOT
 
-puts "Envoi en local d'un mail de #{user_from} vers #{users_to.join(', ')}.."
+puts "Envoi en local d'un mail de #{user_from} vers #{users_to}.."
 # handling exceptions
 begin
  Net::SMTP.start('localhost', 25) do |smtpclient|
-   smtpclient.send_message(the_email, user_from, users_to)
+   smtpclient.send_message(the_email, user_from, users_to_list)
  end
  puts "Mail envoyé"
 rescue Exception => e
