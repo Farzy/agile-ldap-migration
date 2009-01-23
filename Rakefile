@@ -196,9 +196,11 @@ namespace :imap do
 end
   
 namespace :smtp do
-  desc "Copie le fichier /etc/aliases depuis l'ancien serveur"
+  desc "Copie le fichier /etc/aliases depuis l'ancien serveur, en le corrigeant"
   task :copy_aliases => :config do
-    show_exec "scp isis:/etc/aliases /etc"
+    show_exec "scp isis:/etc/aliases /etc/aliases.new"
+    show_exec "grep -v admin@idm.fr /etc/aliases.new > /etc/aliases"
+    show_exec "rm -f /etc/aliases.new"
     show_exec "newaliases"
   end
   desc "Envoie un mail de test en local au serveur SMTP. Ajouter 'MAILTO=xxx@idm.fr,yy@idmfr,zzz@domain.com' pour changer les destinataires"
