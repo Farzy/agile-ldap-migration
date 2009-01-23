@@ -42,7 +42,7 @@ OUTFILE  = File.join(DATADIR, MyConfig["ldap"]["outfile"])
 
 
 # Affiche une chaîne, pour exécute là dans un shell
-def puts_and_exec(str)
+def show_exec(str)
   puts ">>> " + str
   puts %x{#{str}}
 end
@@ -68,29 +68,29 @@ namespace :ldap do
   desc "Récupération de l'annuaire 'isis' et nettoyage"
   task :clean_ldif => :config do
     puts "Récupération de l'annuaire LDAP d'isis"
-    puts_and_exec %{ssh isis "slapcat" > "#{INFILE}"}
+    show_exec %{ssh isis "slapcat" > "#{INFILE}"}
     puts "Nettoyage de l'annuaire LDAP"
-    puts_and_exec %{#{CLEANER} "#{INFILE}" > "#{OUTFILE}"}
+    show_exec %{#{CLEANER} "#{INFILE}" > "#{OUTFILE}"}
   end
 
   desc "Test d'insertion des enregistrements LDAP sur #{HOSTNAME}"
   task :insert_test => :clean_ldif do
     puts "Simulation d'insertion des enregistrements LDAP"
-    puts_and_exec %{ldapadd -n -x -h localhost -D "#{ROOTDN}" -w "#{ROOTPW}" -f "#{OUTFILE}"}
+    show_exec %{ldapadd -n -x -h localhost -D "#{ROOTDN}" -w "#{ROOTPW}" -f "#{OUTFILE}"}
   end
 
   # Attention : cette commande détruit le contenu de l'annuaire
   desc "Insère de façon incrémentale les enregistrements LDAP sur #{HOSTNAME}"
   task :insert_incr => :clean_ldif do
     puts "Insertion incrémentable des enregistrements LDAP"
-    puts_and_exec %{ldapadd -c -x -h localhost -D "#{ROOTDN}" -w "#{ROOTPW}" -f "#{OUTFILE}"}
+    show_exec %{ldapadd -c -x -h localhost -D "#{ROOTDN}" -w "#{ROOTPW}" -f "#{OUTFILE}"}
   end
 
   # Attention : cette commande détruit le contenu de l'annuaire
   desc "Détruit le contenu actuel de l'annuaire LDAP"
   task :empty_directory => :config do
     puts "Remise à zéro de l'annuaire LDAP"
-    puts_and_exec %{/etc/init.d/slapd stop
+    show_exec %{/etc/init.d/slapd stop
     sleep 1
     rm -f /var/lib/ldap/*
     /etc/init.d/slapd start}
@@ -100,7 +100,7 @@ namespace :ldap do
   desc "Insère les enregistrements LDAP sur #{HOSTNAME} en détruisant le contenu précédent"
   task :insert_full => [ :clean_ldif, :empty_directory] do
     puts "Insertion complète des enregistrements LDAP"
-    puts_and_exec %{sleep 2
+    show_exec %{sleep 2
     ldapadd -c -x -h localhost -D "#{ROOTDN}" -w "#{ROOTPW}" -f "#{OUTFILE}"}
   end
 end
@@ -146,7 +146,7 @@ namespace :imap do
   desc "Commande de duplication des dossiers Cyrus (sans leur contenu)"
   task :create_mboxlist => :config do
     puts "Duplication des dossiers Cyrus Imap"
-    puts_and_exec %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+    show_exec %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
       sed -n -e 's/idmfr_//g' -e '/^user\\./ p' | \
       su -c '/usr/sbin/ctl_mboxlist -u' cyrus}
   end
@@ -187,6 +187,7 @@ namespace :imap do
       begin
         IMAP.show_create(folder)
       rescue Net::IMAP::NoResponseError => e
+        # Il y a normalement une exception (bénigne) si le dossier existe déjà
         puts ">>>> Exception #{e}"
       end
       IMAP.show_setacl(folder, "cyrus", "lrswipcda")
@@ -195,9 +196,14 @@ namespace :imap do
 end
   
 namespace :smtp do
+  desc "Copie le fichier /etc/aliases depuis l'ancien serveur"
+  task :copy_aliases => :config do
+    show_exec "scp isis:/etc/aliases /etc"
+    show_exec "newaliases"
+  end
   desc "Envoie un mail de test en local au serveur SMTP"
   task :test_local => :config do
     puts "Test d'envoi d'un mail en local à une adresse @idm.fr de test"
-    puts_and_exec SMTP_SIMULATOR
+    show_exec SMTP_SIMULATOR
   end
 end
