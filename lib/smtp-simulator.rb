@@ -36,7 +36,7 @@ user_from = "ffarid@pragmatic-source.com" # Compte externe
 # On utilise la variable d'environnement MAILTO si elle existe
 users_to = ENV["MAILTO"] || "enqueteirfdev@idm.fr,postmaster@idm.fr"
 
-users_to_list = users_to_list.split(/, */)
+users_to_list = users_to.split(/, */)
 the_email = <<EOT
 From: #{user_from}
 To: #{users_to}
