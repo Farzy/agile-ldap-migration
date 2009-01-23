@@ -138,6 +138,13 @@ class LdapCleaner
         value.gsub!(/\\/, "")
       }
     }
+
+    # L'entrée cn=alias_admin-linux,su=mail,o=idm,c=fr, ne doit pas
+    # comporter d'attribut "mail", car il doit se comporter comme un alias
+    # mail uniquement.
+    if dn == "cn=alias_admin-linux,su=mail,o=idm,c=fr"
+      attrs.delete("mail")
+    end
     
     # Entrées de type societyUnit (su), enregistrée avec l'OC
     # "ou" par erreur. On force l'attribut, au cas où il
