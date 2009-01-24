@@ -157,11 +157,13 @@ namespace :imap do
   desc "Liste les dossiers Cyrus importables (ancien et nouveau nom)"
   task :show_mboxlist => :get_mboxlist do
     puts "Liste des dossiers Cyrus Imap importables (ancien nom, nouveau nom)\n"
-    MBOXLIST.each do |folder_names|
-      puts "#{folder_names.first} => #{folder_names.last}"
+    MBOXLIST.each do |folder_src, folder_dst|
+      puts "#{folder_src} => #{folder_dst}"
     end
     puts "\nListe théorique de tous les comptes IMAP\n"
-    puts USERLIST
+    USERLIST.each do |user_src, user_dst|
+      puts "#{user_src} => #{user_dst}"
+    end
     
   end
 
