@@ -168,7 +168,7 @@ namespace :imap do
   end
 
   desc "Envoie des commandes de test à Cyrus Imap"
-  task :test => "imap:connect" do
+  task :test => :connect do
     puts "Test du serveur IMAP"
     puts "Capability after login: #{IMAP.capability.join(' ')}"
     puts "Création d'un compte/dossier IMAP"
@@ -193,7 +193,7 @@ namespace :imap do
   end
 
   desc "Création de tous les dossiers IMAP"
-  task :create_folders => [ "imap:connect", "imap:get_mboxlist" ] do
+  task :create_folders => [ :connect, :get_mboxlist ] do
     puts "Création de tous les dossiers IMAP"
     MBOXLIST.each do |folder_src, folder_dst|
       puts "Création de #{folder_dst}"
@@ -204,6 +204,16 @@ namespace :imap do
         puts ">>>> Exception #{e}"
       end
       IMAP.show_setacl(folder_dst, "cyrus", "lrswipcda")
+    end
+  end
+
+  desc "Transfert de tous les dossiers IMAP (mode simulation par défaut, préciser DOIT=1 pour le mode réel)"
+  task :copy_folders => :get_mboxlist do
+    dry_run = ENV["DOIT"].nil? ? "--dry-run" : ""
+    USERLIST.each do |user_src, user_dst|
+      puts ">> Copie des mails et dossiers de '#{user_src}' vers '#{user_dst}'\n"
+      show_exec "imapsync --host1 isis --host2 berumail --authuser1 #{MyConfig["imap"]["user"]} --password1 '#{MyConfig["imap"]["password"]}' --authuser2 #{MyConfig["imap"]["user"]} --password2 '#{MyConfig["imap"]["password"]}' --authmech2 PLAIN --subscribe --user1 #{user_src} --user2 #{user_dst} --delete2 --expunge --expunge2 --authmech1 PLAIN --ssl1 --ssl2 --syncinternaldates #{dry_run}"
+      puts "\n"
     end
   end
 end
