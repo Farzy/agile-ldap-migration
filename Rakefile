@@ -133,22 +133,22 @@ namespace :imap do
   
   # Récupère la liste les dossiers Cyrus importables depuis isis
   task :get_mboxlist => :config do
-    MBOXLIST = %x{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
-      sed -n -e 's/idmfr_//g' -e '/^user\\./ p' }
+    # Version originale :
+    # - Uniquement les dossiers préfixés par "user."
+    # - En laissant le préfixe "idmfr_"
+    MBOXLIST_SRC = %x{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+      sed -n -e '/^user\\./ p' }.split(/\n/).map { |l| l.split(/\t/).first }
+    MBOXLIST_DST = MBOXLIST_SRC.map { |l| l.gsub(/idmfr_/, "") }
   end
 
   desc "Liste les dossiers Cyrus importables depuis isis"
   task :show_mboxlist => :get_mboxlist do
     puts "Liste des dossiers Cyrus Imap importables d'isis"
-    puts MBOXLIST
-  end
-
-  desc "Commande de duplication des dossiers Cyrus (sans leur contenu)"
-  task :create_mboxlist => :config do
-    puts "Duplication des dossiers Cyrus Imap"
-    show_exec %{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
-      sed -n -e 's/idmfr_//g' -e '/^user\\./ p' | \
-      su -c '/usr/sbin/ctl_mboxlist -u' cyrus}
+    puts MBOXLIST_SRC
+    puts "Liste des dossiers Cyrus Imap qui seront créés"
+    puts MBOXLIST_DST
+    puts "Liste théorique de tous les comptes IMAP"
+    
   end
 
   desc "Envoie des commandes de test à Cyrus Imap"
@@ -179,10 +179,7 @@ namespace :imap do
   desc "Création de tous les dossiers IMAP"
   task :create_folders => [ "imap:connect", "imap:get_mboxlist" ] do
     puts "Création de tous les dossiers IMAP"
-    # Extraction de la liste des dossiers de MBOXLIST : on garde
-    # le 1er champ de chaque ligne
-    folders = MBOXLIST.split(/\n/).map { |l| l.split(/\t/).first }
-    folders.each do |folder|
+    MBOXLIST_DST.each do |folder|
       puts "Création de #{folder}"
       begin
         IMAP.show_create(folder)
