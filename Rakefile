@@ -133,21 +133,35 @@ namespace :imap do
   
   # Récupère la liste les dossiers Cyrus importables depuis isis
   task :get_mboxlist => :config do
-    # Version originale :
-    # - Uniquement les dossiers préfixés par "user."
-    # - En laissant le préfixe "idmfr_"
-    MBOXLIST_SRC = %x{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
-      sed -n -e '/^user\\./ p' }.split(/\n/).map { |l| l.split(/\t/).first }
-    MBOXLIST_DST = MBOXLIST_SRC.map { |l| l.gsub(/idmfr_/, "") }
+    # On garde uniquement les dossiers préfixés par "user."
+    # Le tableau a 2 colonnes :
+    # - La 1ère contient les noms de dossieers source, contenant notamment le préfixe "idmfr_"
+    # - La 2nde les noms de dossiers nettoyés pour le nouveau serveur
+    MBOXLIST = %x{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+      sed -n -e '/^user\\./ p' }.split(/\n/).map do |line|
+      folder = line.split(/\t/).first
+      [ folder, folder.gsub(/idmfr_/, "") ]
+    end
+    # On en extrait les noms de comptes, en ne gardant que les dossiers
+    # à la racine de "user.".
+    USERLIST = MBOXLIST.map do |folder_src, folder_dst|
+      if folder_src.count(".") == 1
+        # On garde le terme qui suit "user."
+        [folder_src.split(".").last, folder_dst.split(".").last]
+      else
+        nil
+      end.compact! # Suppression des valeurs "nil"
+    end
   end
 
-  desc "Liste les dossiers Cyrus importables depuis isis"
+  desc "Liste les dossiers Cyrus importables (ancien et nouveau nom)"
   task :show_mboxlist => :get_mboxlist do
-    puts "Liste des dossiers Cyrus Imap importables d'isis"
-    puts MBOXLIST_SRC
-    puts "Liste des dossiers Cyrus Imap qui seront créés"
-    puts MBOXLIST_DST
-    puts "Liste théorique de tous les comptes IMAP"
+    puts "Liste des dossiers Cyrus Imap importables (ancien nom, nouveau nom)\n"
+    MBOXLIST.each do |folder_names|
+      puts "#{folder_names.first} => #{folder_names.last}"
+    end
+    puts "\nListe théorique de tous les comptes IMAP\n"
+    puts USERLIST
     
   end
 
@@ -179,15 +193,15 @@ namespace :imap do
   desc "Création de tous les dossiers IMAP"
   task :create_folders => [ "imap:connect", "imap:get_mboxlist" ] do
     puts "Création de tous les dossiers IMAP"
-    MBOXLIST_DST.each do |folder|
-      puts "Création de #{folder}"
+    MBOXLIST.each do |folder_src, folder_dst|
+      puts "Création de #{folder_dst}"
       begin
-        IMAP.show_create(folder)
+        IMAP.show_create(folder_dst)
       rescue Net::IMAP::NoResponseError => e
         # Il y a normalement une exception (bénigne) si le dossier existe déjà
         puts ">>>> Exception #{e}"
       end
-      IMAP.show_setacl(folder, "cyrus", "lrswipcda")
+      IMAP.show_setacl(folder_dst, "cyrus", "lrswipcda")
     end
   end
 end
