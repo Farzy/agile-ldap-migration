@@ -150,7 +150,7 @@ namespace :imap do
         [folder_src.split(".").last, folder_dst.split(".").last]
       else
         nil
-      end.compact! # Suppression des valeurs "nil"
+      end.compact # Suppression des valeurs "nil"
     end
   end
 
