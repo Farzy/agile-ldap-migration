@@ -150,8 +150,8 @@ namespace :imap do
         [folder_src.split(".").last, folder_dst.split(".").last]
       else
         nil
-      end.compact # Suppression des valeurs "nil"
-    end
+      end
+    end.compact # Suppression des valeurs "nil"
   end
 
   desc "Liste les dossiers Cyrus importables (ancien et nouveau nom)"
