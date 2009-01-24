@@ -8,6 +8,4 @@ ldap:
   outfile: idm-clean.ldif
 imap:
   user: cyrus
-  password: Ir,A,ptlE2lT
-  
-
+  password: p0rtug4L
