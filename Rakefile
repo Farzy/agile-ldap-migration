@@ -209,7 +209,7 @@ namespace :imap do
 
   desc "Transfert de tous les dossiers IMAP (mode simulation par défaut, préciser DOIT=1 pour le mode réel)"
   task :copy_folders => :get_mboxlist do
-    dry_run = ENV["DOIT"].nil? ? "--dry-run" : ""
+    dry_run = ENV["DOIT"].nil? ? "--dry" : ""
     USERLIST.each do |user_src, user_dst|
       puts ">> Copie des mails et dossiers de '#{user_src}' vers '#{user_dst}'\n"
       show_exec "imapsync --host1 isis --host2 berumail --authuser1 #{MyConfig["imap"]["user"]} --password1 '#{MyConfig["imap"]["password"]}' --authuser2 #{MyConfig["imap"]["user"]} --password2 '#{MyConfig["imap"]["password"]}' --authmech2 PLAIN --subscribe --user1 #{user_src} --user2 #{user_dst} --delete2 --expunge --expunge2 --authmech1 PLAIN --ssl1 --ssl2 --syncinternaldates #{dry_run}"
