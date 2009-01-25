@@ -146,8 +146,9 @@ namespace :imap do
     # à la racine de "user.".
     USERLIST = MBOXLIST.map do |folder_src, folder_dst|
       if folder_src.count(".") == 1
-        # On garde le terme qui suit "user."
-        [folder_src.split(".").last, folder_dst.split(".").last]
+        # On garde le terme qui suit "user.", que l'on met en minuscule
+        # pour Cyrus Imap 2.2.x
+        [ folder_src.split(".").last, folder_dst.split(".").last.downcase ]
       else
         nil
       end
