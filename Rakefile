@@ -208,7 +208,7 @@ namespace :imap do
     end
   end
 
-  desc "Transfert de tous les dossiers IMAP (mode simulation par défaut, préciser DOIT=1 pour le mode réel)"
+  desc "Transfert de tous les dossiers IMAP (simulation par défaut, DOIT=1 pour le mode réel)"
   task :copy_folders => :get_mboxlist do
     dry_run = ENV["DOIT"].nil? ? "--dry" : ""
     USERLIST.each do |user_src, user_dst|
@@ -227,7 +227,7 @@ namespace :smtp do
     show_exec "rm -f /etc/aliases.new"
     show_exec "newaliases"
   end
-  desc "Envoie un mail de test en local au serveur SMTP. Ajouter 'MAILTO=xxx@idm.fr,yy@idmfr,zzz@domain.com' pour changer les destinataires"
+  desc "Envoie un mail de test au SMTP local (option MAILTO=xxx@idm.fr,yy@idmfr,zzz@domain.com')"
   task :test_local => :config do
     puts "Test d'envoi d'un mail en local à une adresse @idm.fr de test"
     show_exec SMTP_SIMULATOR

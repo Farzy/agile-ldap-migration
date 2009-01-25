@@ -1,4 +1,8 @@
 # Configuration de l'outil de migration LDAP/IMAP
+#
+# Date : 2009-01-13
+#
+# Copyright (C) 2009 Farzad FARID <ffarid@pragmatic-source.com>
 
 hostname: berumail
 ldap:
