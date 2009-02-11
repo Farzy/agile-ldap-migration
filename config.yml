@@ -4,12 +4,12 @@
 #
 # Copyright (C) 2009 Farzad FARID <ffarid@pragmatic-source.com>
 
-hostname: berumail
+hostname: new-srv
 ldap:
-  user: cn=admin, o=idm, c=fr
-  password: Ur,ec1blC
-  infile: idm-orig.ldif
-  outfile: idm-clean.ldif
+  user: cn=admin, o=customer, c=fr
+  password: XXXXXXXX
+  infile: customer-orig.ldif
+  outfile: customer-clean.ldif
 imap:
   user: cyrus
-  password: p0rtug4L
+  password: YYYYY

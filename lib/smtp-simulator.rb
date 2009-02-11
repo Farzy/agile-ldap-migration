@@ -32,9 +32,9 @@ require 'net/smtp'
 
 # Création du mail à envoyer
 user_from = "ffarid@pragmatic-source.com" # Compte externe
-# Destinataires : des comptes de test IDM et des alias LDAP
+# Destinataires : des comptes de test et des alias LDAP
 # On utilise la variable d'environnement MAILTO si elle existe
-users_to = ENV["MAILTO"] || "enqueteirfdev@idm.fr,postmaster@idm.fr"
+users_to = ENV["MAILTO"] || "enqueteirfdev@customer.fr,postmaster@customer.fr"
 
 users_to_list = users_to.split(/, */)
 the_email = <<EOT

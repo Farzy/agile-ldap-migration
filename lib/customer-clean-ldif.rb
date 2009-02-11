@@ -2,8 +2,8 @@
 # -*- coding: UTF-8 -*-
 # vim: sw=2 sts=2:
 
-# idm-clean-ldif.rb : Nettoyage et mise en conformité de l'annuaire
-# LDAP IDM pour OpenLDAP 2.3
+# customer-clean-ldif.rb : Nettoyage et mise en conformité de l'annuaire
+# LDAP pour OpenLDAP 2.3
 
 # Auteur:: Farzad FARID
 # Copyright:: (C) 2008-2009 Pragmatic Source
@@ -39,7 +39,7 @@ require 'ldap/ldif'
 require 'trollop'
 require 'pp'
 
-PROGNAME = "idm-clean-ldif"
+PROGNAME = "customer-clean-ldif"
 VERS = "1.0"
 
 class LdapCleaner
@@ -127,9 +127,9 @@ class LdapCleaner
 
     # Suppression des entrées suivantes :
     # - Entrée de test à supprimer, car elle est incorrecte
-    # - Entrée qui fait doublon avec "cn=alias_admin-linux,su=idm.fr,o=idm,c=fr"
-    return if [ "cn=test,o=idm,c=fr",
-          "cn=Copier de alias_admin-linux,su=idm.fr,o=idm,c=fr" ].include?(dn)
+    # - Entrée qui fait doublon avec "cn=alias_admin-linux,su=customer.fr,o=customer,c=fr"
+    return if [ "cn=test,o=customer,c=fr",
+          "cn=Copier de alias_admin-linux,su=customer.fr,o=customer,c=fr" ].include?(dn)
 
 
     # Nettoyage des Backslashes : on les supprime
@@ -139,10 +139,10 @@ class LdapCleaner
       }
     }
 
-    # L'entrée cn=alias_admin-linux,su=mail,o=idm,c=fr, ne doit pas
+    # L'entrée cn=alias_admin-linux,su=mail,o=customer,c=fr, ne doit pas
     # comporter d'attribut "mail", car il doit se comporter comme un alias
     # mail uniquement.
-    if dn == "cn=alias_admin-linux,su=mail,o=idm,c=fr"
+    if dn == "cn=alias_admin-linux,su=mail,o=customer,c=fr"
       attrs.delete("mail")
     end
     
@@ -166,7 +166,7 @@ class LdapCleaner
 
     # su=glucoz.com contient un attribut "ou" qu'il faut supprimer
     # "gensduvoyage.com" aussi
-    if (rdn_name == "su" && rdn_value == "glucoz.com") || dn == "su=gensduvoyage.com, o=idm, c=fr"
+    if (rdn_name == "su" && rdn_value == "glucoz.com") || dn == "su=gensduvoyage.com, o=customer, c=fr"
       attrs.delete("ou")
     end
     
@@ -264,11 +264,11 @@ class LdapCleaner
     end
 
     # Correction des identifiants de messagerie Cyrus Imap. On enlève le
-    # préfixe "idmfr_". On laisse les autres éventuels préfixes, pour les
+    # préfixe "customerfr_". On laisse les autres éventuels préfixes, pour les
     # autres domaines (de clients), qui sont à corriger plus tard si besoin.
     [ "routingaddress", "cyrusmailbox" ].each do |attr_name|
       if attrs.has_key?(attr_name)
-        attrs[attr_name].map! { |attr| attr.gsub(/idmfr_/, "") }
+        attrs[attr_name].map! { |attr| attr.gsub(/customerfr_/, "") }
       end
     end
     

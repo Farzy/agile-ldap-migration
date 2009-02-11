@@ -1,5 +1,5 @@
 # 
-# Rakefile de contrôle de la migration LDAP / IMAP d'IDM
+# Rakefile de contrôle de la migration LDAP / IMAP
 # 
 # Date : 2009-01-13
 # 
@@ -30,7 +30,7 @@ require 'rake/rdoctask'
 #######################################################################
 TESTDIR  = File.join(File.dirname(__FILE__), "test")
 DATADIR  = File.join(File.dirname(__FILE__), "data")
-CLEANER  = File.join("lib", "idm-clean-ldif.rb")
+CLEANER  = File.join("lib", "customer-clean-ldif.rb")
 SMTP_SIMULATOR = File.join("lib", "smtp-simulator.rb")
 
 MyConfig = YAML.load(IO.read(File.join(File.dirname(__FILE__), "config.yml")))
@@ -65,10 +65,10 @@ task :default do
 end
 
 namespace :ldap do
-  desc "Récupération de l'annuaire 'isis' et nettoyage"
+  desc "Récupération de l'annuaire 'old-srv' et nettoyage"
   task :clean_ldif => :config do
-    puts "Récupération de l'annuaire LDAP d'isis"
-    show_exec %{ssh isis "slapcat" > "#{INFILE}"}
+    puts "Récupération de l'annuaire LDAP d'old-srv"
+    show_exec %{ssh old-srv "slapcat" > "#{INFILE}"}
     puts "Nettoyage de l'annuaire LDAP"
     show_exec %{#{CLEANER} "#{INFILE}" > "#{OUTFILE}"}
   end
@@ -131,16 +131,16 @@ namespace :imap do
     end
   end
   
-  # Récupère la liste les dossiers Cyrus importables depuis isis
+  # Récupère la liste les dossiers Cyrus importables depuis old-srv
   task :get_mboxlist => :config do
     # On garde uniquement les dossiers préfixés par "user."
     # Le tableau a 2 colonnes :
-    # - La 1ère contient les noms de dossieers source, contenant notamment le préfixe "idmfr_"
+    # - La 1ère contient les noms de dossieers source, contenant notamment le préfixe "customerfr_"
     # - La 2nde les noms de dossiers nettoyés pour le nouveau serveur
-    MBOXLIST = %x{ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+    MBOXLIST = %x{ssh old-srv "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
       sed -n -e '/^user\\./ p' }.split(/\n/).map do |line|
       folder = line.split(/\t/).first
-      [ folder, folder.gsub(/idmfr_/, "") ]
+      [ folder, folder.gsub(/customerfr_/, "") ]
     end
     # On en extrait les noms de comptes, en ne gardant que les dossiers
     # à la racine de "user.".
@@ -213,7 +213,7 @@ namespace :imap do
     dry_run = ENV["DOIT"].nil? ? "--dry" : ""
     USERLIST.each do |user_src, user_dst|
       puts ">> Copie des mails et dossiers de '#{user_src}' vers '#{user_dst}'\n"
-      show_exec "imapsync --host1 isis --host2 berumail --authuser1 #{MyConfig["imap"]["user"]} --password1 '#{MyConfig["imap"]["password"]}' --authuser2 #{MyConfig["imap"]["user"]} --password2 '#{MyConfig["imap"]["password"]}' --authmech2 PLAIN --subscribe --user1 #{user_src} --user2 #{user_dst} --delete2 --expunge --expunge2 --authmech1 PLAIN --ssl1 --ssl2 --syncinternaldates #{dry_run}"
+      show_exec "imapsync --host1 old-srv --host2 new-srv --authuser1 #{MyConfig["imap"]["user"]} --password1 '#{MyConfig["imap"]["password"]}' --authuser2 #{MyConfig["imap"]["user"]} --password2 '#{MyConfig["imap"]["password"]}' --authmech2 PLAIN --subscribe --user1 #{user_src} --user2 #{user_dst} --delete2 --expunge --expunge2 --authmech1 PLAIN --ssl1 --ssl2 --syncinternaldates #{dry_run}"
       puts "\n"
     end
   end
@@ -222,14 +222,14 @@ end
 namespace :smtp do
   desc "Copie le fichier /etc/aliases depuis l'ancien serveur, en le corrigeant"
   task :copy_aliases => :config do
-    show_exec "scp isis:/etc/aliases /etc/aliases.new"
-    show_exec "grep -v admin@idm.fr /etc/aliases.new > /etc/aliases"
+    show_exec "scp old-srv:/etc/aliases /etc/aliases.new"
+    show_exec "grep -v admin@customer.fr /etc/aliases.new > /etc/aliases"
     show_exec "rm -f /etc/aliases.new"
     show_exec "newaliases"
   end
-  desc "Envoie un mail de test au SMTP local (option MAILTO=xxx@idm.fr,yy@idmfr,zzz@domain.com')"
+  desc "Envoie un mail de test au SMTP local (option MAILTO=xxx@customer.fr,yy@customerfr,zzz@domain.com')"
   task :test_local => :config do
-    puts "Test d'envoi d'un mail en local à une adresse @idm.fr de test"
+    puts "Test d'envoi d'un mail en local à une adresse @customer.fr de test"
     show_exec SMTP_SIMULATOR
   end
 end

@@ -1,7 +1,7 @@
-INFILE	:= idm-orig.ldif
-OUTFILE := idm-clean.ldif
-CLEANER := ./idm-clean-ldif.rb
-ROOTDN  := "cn=admin, o=idm, c=fr"
+INFILE	:= customer-orig.ldif
+OUTFILE := customer-clean.ldif
+CLEANER := ./customer-clean-ldif.rb
+ROOTDN  := "cn=admin, o=customer, c=fr"
 ROOTPW  := "Ur,ec1blC"
 
 all:
@@ -9,7 +9,7 @@ all:
 	exit 1
 
 clean_ldif:
-	ssh isis "slapcat" > $(INFILE)
+	ssh old-srv "slapcat" > $(INFILE)
 	$(CLEANER) $(INFILE) > $(OUTFILE)
 
 test_ldif: clean_ldif
@@ -33,6 +33,6 @@ insert_full: clean_ldif empty_directory
 
 # Commande de duplication des dossiers Cyrus (sans leur contenu)
 create_mboxlist:
-		ssh isis "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
-		sed -n -e 's/idmfr_//g' -e '/^user\./ p' | \
+		ssh old-srv "su -c '/usr/sbin/ctl_mboxlist -d' cyrus" | \
+		sed -n -e 's/customerfr_//g' -e '/^user\./ p' | \
 		su -c '/usr/sbin/ctl_mboxlist -u' cyrus
