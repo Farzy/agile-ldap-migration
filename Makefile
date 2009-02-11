@@ -2,7 +2,7 @@ INFILE	:= customer-orig.ldif
 OUTFILE := customer-clean.ldif
 CLEANER := ./customer-clean-ldif.rb
 ROOTDN  := "cn=admin, o=customer, c=fr"
-ROOTPW  := "Ur,ec1blC"
+ROOTPW  := "XXXXX"
 
 all:
 	@echo "Vous devez specifier la commande a executer"
