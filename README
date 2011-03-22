@@ -1,3 +1,6 @@
 == LDAP Migration
 
-You should document your project here.
+LDAP / IMAP Migration with an elegant Rakefile.
+
+Check the slides on http://www.pragmatic-source.com/downloads/Apero-Ruby-11/Du-Makefile-au-Rakefile/index.html (in French)
+for a short explanation of the motivations behind this tool.
